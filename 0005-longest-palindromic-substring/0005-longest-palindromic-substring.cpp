@@ -1,51 +1,53 @@
 class Solution {
 public:
-    std::vector<std::vector<bool>> palindromes;
+    string longestPalindrome(string word) {
+        string extended = "";
 
-    bool iterativeCheck(std::string &s, int i, int k) {
-        for (int start = i, last = k; start < last; start++, last--) {
-            if (palindromes[start][last])
-                break;
-            else if(s.at(start)!=s.at(last))
-                return false;
+    for (int i = 0; i < word.length() * 2 + 1; i++) {
+        if (i & 1) {
+            extended += word.at(i/2);
+        } else {
+            extended += '#';
         }
-        palindromes[i][k] = true;
-        return true;
     }
 
-    /*bool recursiveCheck(std::string &s, int i, int k) {
-        if (i >= k) {
-            palindromes[i][k] = true;
-            return true;
-        }
-        if (palindromes[i][k])
-            return true;
-        else if (s.at(i) == s.at(k)) {
-            bool isSubStrPalindrome = recursiveCheck(s, i + 1, k - 1);
-            if(isSubStrPalindrome)   {
-                palindromes[i, k];
-                return true;
-            }
-        }
-        return false;
-    }*/
+    vector<int> lps(extended.length(), 0);
 
-    std::string longestPalindrome(std::string s) {
-        unsigned long strLen = s.length();
-        palindromes = std::vector<std::vector<bool>>(strLen, std::vector<bool>(strLen, false));
-        std::string maxPal = "";
-
-        for (int diff = 0; diff < strLen; diff++) {
-            int start = 0;
-            while (start + diff < strLen) {
-                if (s.at(start) == s.at(start + diff) && iterativeCheck(s, start, start +diff)) {
-                    unsigned long maxLen = maxPal.length();
-                    if(maxLen <diff+1) maxPal = s.substr(start, diff+1);
-                }
-                start++;
-            }
+    int r = 0;
+    int c = 0;
+    int len = extended.length();
+    for (int i = 1; i < len; i++) {
+        if (i < r) {
+            lps.at(i) = min(r - i, lps.at(2 * c - i));
         }
 
-        return maxPal;
+        while (i - 1 - lps.at(i) >= 0 && i + 1 + lps.at(i) < len
+               && extended.at(i - 1 - lps.at(i)) == extended.at(i + 1 + lps.at(i))) {
+            lps.at(i)++;
+        }
+
+        if (lps.at(i) + i > r) {
+            c = i;
+            r = c + lps.at(c);
+        }
+    }
+
+    int maxLen = -1;
+    int idx = 0;
+
+    for (int i = 0; i < lps.size(); i++) {
+        if (lps.at(i) > maxLen) {
+            maxLen = lps.at(i);
+            idx = i;
+        }
+    }
+
+    string res = "";
+    for (int i = idx - maxLen; i < idx + maxLen; i++) {
+        if (extended.at(i) != '#') {
+            res += extended.at(i);
+        }
+    }
+    return res;
     }
 };
